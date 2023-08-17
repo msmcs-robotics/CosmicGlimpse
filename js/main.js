@@ -14,9 +14,25 @@ const temperatureChart = new Chart(ctx, {
     ],
   },
   options: {
-    // Configure chart options as needed
+    scales: {
+      xAxes: [{
+        type: 'time',
+        time: {
+          unit: 'second',
+        },
+        distribution: 'linear',
+      }],
+      yAxes: [{
+        ticks: {
+          beginAtZero: true,
+        },
+      }],
+    },
   },
 });
+
+// Display the most recent temperature reading and log to console
+const latestTemperatureElement = document.getElementById('latestTemperature');
 
 // Fetch and update graph data every few seconds
 function fetchDataAndUpdateGraph() {
@@ -26,6 +42,13 @@ function fetchDataAndUpdateGraph() {
       const timestamp = new Date().toLocaleTimeString();
       const temperature = data.temperature; // Modify this based on your API response
 
+      // Log data to console
+      console.log('Received Data - Timestamp:', timestamp, 'Temperature:', temperature);
+
+      // Update the latest temperature element
+      latestTemperatureElement.textContent = `Latest Temperature: ${temperature} °C`;
+
+      // Update chart data
       temperatureChart.data.labels.push(timestamp);
       temperatureChart.data.datasets[0].data.push(temperature);
 
