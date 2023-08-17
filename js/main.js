@@ -36,27 +36,28 @@ const latestTemperatureElement = document.getElementById('latestTemperature');
 
 // Fetch and update graph data every few seconds
 function fetchDataAndUpdateGraph() {
-  fetch('/api/temperature')
-    .then(response => response.json())
-    .then(data => {
-      const timestamp = new Date().toLocaleTimeString();
-      const temperature = data.temperature; // Modify this based on your API response
-
-      // Log data to console
-      console.log('Received Data - Timestamp:', timestamp, 'Temperature:', temperature);
-
-      // Update the latest temperature element
-      latestTemperatureElement.textContent = `Latest Temperature: ${temperature} °C`;
-
-      // Update chart data
-      temperatureChart.data.labels.push(timestamp);
-      temperatureChart.data.datasets[0].data.push(temperature);
-
-      temperatureChart.update();
-    })
-    .catch(error => {
-      console.error('Error fetching data:', error);
-    });
-}
+    fetch('/CosmicGlimpse/api/temperature')  // Update the URL here
+      .then(response => response.json())
+      .then(data => {
+        const timestamp = new Date().toLocaleTimeString();
+        const temperature = data.temperature; // Modify this based on your API response
+  
+        // Log data to console
+        console.log('Received Data - Timestamp:', timestamp, 'Temperature:', temperature);
+  
+        // Update the latest temperature element
+        latestTemperatureElement.textContent = `Latest Temperature: ${temperature} °C`;
+  
+        // Update chart data
+        temperatureChart.data.labels.push(timestamp);
+        temperatureChart.data.datasets[0].data.push(temperature);
+  
+        temperatureChart.update();
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }
+  
 
 setInterval(fetchDataAndUpdateGraph, 5000); // Fetch data every 5 seconds
