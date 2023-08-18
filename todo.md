@@ -1,0 +1,5 @@
+- [] Add Authentication
+- [] Support multiple sensors
+- [] Have multiple charts
+  - [] one chart with all sensors
+  - [] one chart per sensor

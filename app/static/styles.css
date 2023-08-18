@@ -1,0 +1,39 @@
+/* Reset default margin and padding for the whole page */
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+/* Style for the chart canvas */
+#sensorChart {
+    max-width: 100%;
+    margin: 20px auto;
+    display: block;
+    border: 1px solid #ccc;
+}
+
+/* Center align text in the page */
+.text-center {
+    text-align: center;
+}
+
+/* Set background color and padding for the header */
+.header {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+}
+
+/* Basic styling for buttons */
+.button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}

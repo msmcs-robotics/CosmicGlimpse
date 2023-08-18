@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensor Data Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="sensorDataChart"></canvas>
+    <script>
+        const ctx = document.getElementById('sensorDataChart').getContext('2d');
+        let values = [];
+        let timestamps = [];
+
+        async function fetchSensorDataCount() {
+            const countResponse = await fetch('/api/get-sensor-data-count');
+            const countData = await countResponse.json();
+            console.log(countData.count);
+            return countData.count;
+        }
+
+        async function fetchData(numDataPoints) {
+            const response = await fetch(`/api/get-sensor-data`);
+            const data = await response.json();
+            return data;
+        }
+
+        async function updateGraph() {
+            const numDataPoints = await fetchSensorDataCount();
+            const data = await fetchData();
+            
+            if (data.length > 0) {
+                values = data.map(entry => entry.value);
+                timestamps = data.map(entry => entry.timestamp);
+            } else {
+                // Initialize with default values
+                values = [0];
+                timestamps = [0];
+            }
+
+            const config = {
+                type: 'line',
+                data: {
+                    labels: timestamps,
+                    datasets: [{
+                        label: 'Sensor Data',
+                        data: values,
+                        fill: false,
+                        borderColor: 'blue'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 20
+                        },
+                        x: {
+                            min: 0,
+                            max: values.length > 10 ? Math.ceil(values.length / 10) * 10 : 10,
+                            ticks: {
+                                stepSize: values.length > 10 ? 10 : 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                },
+                                pinch: {
+                                    enabled: true,
+                                },
+                                mode: 'xy',
+                            }
+                        }
+                    }
+                }
+            };
+
+            new Chart(ctx, config);
+        }
+
+        updateGraph();
+    </script>
+</body>
+</html>
