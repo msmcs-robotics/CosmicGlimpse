@@ -1,0 +1,30 @@
+docker build -t cosmicg-glimpse .
+
+docker run -p 3000:3000 -d --name cg-test cosmicg-glimpse
+
+
+
+docker stop cg-test
+
+docker rm cg-test
+
+docker rmi cosmicg-glimpse
+
+
+
+# Volume
+
+docker volume create --driver local \
+  --opt type=none \
+  --opt device=.data \
+  --opt o=bind \
+  mydata
+
+
+# Docker compose
+
+
+docker-compose --verbose up -d
+
+docker-compose down
+docker rmi cosmic-glimpse
