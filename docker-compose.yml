@@ -3,29 +3,50 @@ services:
   influxdb:
     image: influxdb:latest
     container_name: influxdb
+    networks:
+      - cgnet
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
     ports:
       - "8086:8086"
     volumes:
-      - mydata:/var/lib/influxdb  # Use the 'mydata' volume for InfluxDB data
+      - influxdb-data:/var/lib/influxdb2
     environment:
-      - INFLUXDB_DB=mydb
-      - INFLUXDB_ADMIN_USER=myuser
-      - INFLUXDB_ADMIN_PASSWORD=mypassword
-      - INFLUXDB_HTTP_AUTH_ENABLED=true
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=my-user
+      - DOCKER_INFLUXDB_INIT_PASSWORD=my-password
+      - DOCKER_INFLUXDB_INIT_ORG=my-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=my-bucket
+      - DOCKER_INFLUXDB_INIT_RETENTION=30d  # Adjust retention period as needed
 
   nodeapp:
     build:
-      context: ./app  # Path to your Node.js app's directory
-      dockerfile: Dockerfile  # Specify the Dockerfile to use
+      context: ./app
+      dockerfile: Dockerfile
     container_name: cg-test
-    image: cosmic-glimpse  # Explicitly specify the image name
+    image: cosmic-glimpse
     ports:
       - "3000:3000"
     environment:
       - INFLUXDB_HOST=influxdb
       - INFLUXDB_PORT=8086
+      - INFLUXDB_DB=mydb
+      - INFLUXDB_USER=myuser
+      - INFLUXDB_PASSWORD=mypassword
+      - INFLUXDB_HTTP_AUTH_ENABLED=true
     depends_on:
       - influxdb
+    networks:
+      - cgnet
+
+networks:
+  cgnet:
 
 volumes:
-  mydata:  # Define the 'mydata' Docker volume
+  influxdb-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: D:\\GithubRepos\\msmcs-robotics\\CosmicGlimpse\\.data

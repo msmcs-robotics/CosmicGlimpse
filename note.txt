@@ -24,7 +24,11 @@ docker volume create --driver local \
 # Docker compose
 
 
-docker-compose --verbose up -d
+docker-compose --verbose up --build -d
+docker ps 
+docker-compose logs nodeapp
+docker-compose logs influxdb
+
 
 docker-compose down
 docker rmi cosmic-glimpse
