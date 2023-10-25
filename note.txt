@@ -23,7 +23,7 @@ docker volume create --driver local \
 
 # Docker compose
 
-
+docker build -t cosmic-glimpse -f Dockerfile ../
 docker-compose --verbose up --build -d
 docker ps 
 docker-compose logs nodeapp
@@ -32,3 +32,8 @@ docker-compose logs influxdb
 
 docker-compose down
 docker rmi cosmic-glimpse
+
+
+docker image prune
+docker container prune
+docker volume prune
