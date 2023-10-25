@@ -18,6 +18,7 @@ services:
       - DOCKER_INFLUXDB_INIT_PASSWORD=mypassword
       - DOCKER_INFLUXDB_INIT_ORG=myorg
       - DOCKER_INFLUXDB_INIT_BUCKET=mybucket
+      - INFLUXDB_HTTP_AUTH_ENABLED=true
       # - DOCKER_INFLUXDB_INIT_RETENTION=30d  # Adjust retention period as needed
 
   nodeapp:

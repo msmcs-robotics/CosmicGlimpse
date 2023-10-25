@@ -1,14 +1,12 @@
-docker build -t cosmicg-glimpse .
+docker build -t cosmic-glimpse -f Dockerfile .
 
-docker run -p 3000:3000 -d --name cg-test cosmicg-glimpse
-
-
+docker run -p 3000:3000 -d --name cg-test cosmic-glimpse
 
 docker stop cg-test
 
 docker rm cg-test
 
-docker rmi cosmicg-glimpse
+docker rmi cosmic-glimpse
 
 
 
@@ -23,7 +21,7 @@ docker volume create --driver local \
 
 # Docker compose
 
-docker build -t cosmic-glimpse -f Dockerfile ../
+docker build -t cosmic-glimpse -f Dockerfile .
 docker-compose --verbose up --build -d
 docker ps 
 docker-compose logs nodeapp
