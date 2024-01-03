@@ -25,23 +25,21 @@
 #include <Ethernet.h>
 #include "secrets.h"
 #include "ThingSpeak.h" // always include thingspeak header file after other header files and custom macros
+#include <Wire.h>
+#include <Adafruit_LIS3MDL.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_SensorLab.h>
+#include <Adafruit_Sensor_Calibration.h>
+#include <Arduino.h> // Include the ESP32 Arduino core library Eorks with ESP32 Adafruit Feather
 
 byte mac[] = SECRET_MAC;
-
 // Set the static IP address to use if the DHCP fails to assign
 IPAddress ip(192, 168, 0, 177);
 IPAddress myDns(192, 168, 0, 1);
-
 EthernetClient client;
 
 unsigned long myChannelNumber = SECRET_CH_ID;
 const char * myWriteAPIKey = SECRET_WRITE_APIKEY;
-
-// Initialize our values
-int number1 = 1;
-int number2 = 2;//random(0,100);
-int number3 = 3;//random(0,100);
-int number4 = 4;//random(0,100);
 
 float Bx; 
 float By;
@@ -50,20 +48,9 @@ float fx;
 float fy;
 float fz;
 
-
+int channel_delay = 20000; // Wait 20 seconds to update the channel again
 
 //  magnetometer readings from Adafruit LIS3MDL and ESP32 Huzaah Feather
-
-#include <Wire.h>
-#include <Adafruit_LIS3MDL.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_SensorLab.h>
-#include <Adafruit_Sensor_Calibration.h>
-
-//FreqCounter3ChanESP32AdafruitFeather3.ino
-//Measure 3 frequencies and displays
-// Include the ESP32 Arduino core library Eorks with ESP32 Adafruit Feather
-#include <Arduino.h>
 
 // Define the pins for frequency measurement
 const int fxON = 26; // This is pin A1  By  Look at the adafruit web site pin out 
@@ -72,7 +59,6 @@ const int fzON = 4; // This is pin A2  Bz
 const int fxIN = 34; // fx and gate enable
 const int fyIN = 39; // fy and gate enable
 const int fzIN = 36; // fz and gate enable
-
 
 // Variables to store the pulse counts
 volatile long count1 = 0;
@@ -102,12 +88,6 @@ void IRAM_ATTR isr3() {
 }
 
 
-
-
-
-
-
-
 Adafruit_Sensor *mag = NULL, *gyro = NULL, *accel = NULL;
 sensors_event_t mag_event, gyro_event, accel_event;
 
@@ -133,7 +113,6 @@ const float soft_iron[3][3] = {
 // mag_decl = ( /-)(deg   min/60   sec/3600)
 // Set to 0 to get magnetic heading instead of geo heading
 const float mag_decl = -1.233;
-
 
 
 void setup(void) {
@@ -260,16 +239,16 @@ void setup(void) {
 
 void loop() {
 
-GetDataApplyCalibration();
-PrintMags();//
-getfreaqs();
-PrintFreqs();
-//Out2MatLab2Fit();
-OutToThingSpeak();
+  GetDataApplyCalibration();
+  PrintMags();//
+  getfreaqs();
+  PrintFreqs();
+  //Out2MatLab2Fit();
+  OutToThingSpeak();
 
 }
-void PrintMags()
-{
+
+void PrintMags(){
   Serial.print("[Bx,By, Bz] = [");
   Serial.print(Bx, 2);   // Bx
   Serial.print("\t");
@@ -278,13 +257,11 @@ void PrintMags()
   Serial.print(Bz, 2);   //Bz
   Serial.print("] uTesla     ");
   Serial.println(" ");
-
-
 }
 
 void PrintFreqs(){
- // Print the frequencies to MATLAB[
- Serial.print("fx,fy,fz =  [");
+  // Print the frequencies to MATLAB[
+  Serial.print("fx,fy,fz =  [");
   Serial.print(fx);
   Serial.print(",  ");
   Serial.print(fy);
@@ -293,21 +270,9 @@ void PrintFreqs(){
   Serial.println(" ]  HZ");  
 
 }
-void Out2MatLab2Fit(){
-  Serial.println("");
-  //Serial.println("B & f Out To MATLAB!");
-  //Serial.flush(); 
-  // Send data as CSV
-  Serial.print(fx);Serial.print(",");Serial.print(fy);Serial.print(",");Serial.print(fz);Serial.print(",");
-  Serial.print(Bx);Serial.print(",");Serial.print(By);Serial.print(",");Serial.print(Bz);
-  Serial.println("");  // End the line with a newline character
-  //delay(20); // Adjust the delay based on your needs
-}
 
-
-void GetDataApplyCalibration()
-{
-float hi_cal[3];
+void GetDataApplyCalibration(){
+  float hi_cal[3];
   float heading = 0;
  
  //Get  new sensor event, normalized to uTesla */
@@ -360,7 +325,7 @@ float hi_cal[3];
 
   //Uncomment to Send data To MotionCal
   /*
-//'Raw' values to match expectation of MotionCal
+  //'Raw' values to match expectation of MotionCal
   
   Serial.print("Raw:");
   Serial.print(int(accel_event.acceleration.x*8192/9.8)); Serial.print(",");
@@ -383,10 +348,7 @@ float hi_cal[3];
   Serial.print(mag_event.magnetic.x); Serial.print(",");
   Serial.print(mag_event.magnetic.y); Serial.print(",");
   Serial.print(mag_event.magnetic.z); Serial.println("");
-
-*/
-
-
+  */
 }
 
 void getfreaqs(){
@@ -412,11 +374,10 @@ void getfreaqs(){
  
 }
 
-float getfreaqs2()
-{
-float fx1;
-float fy1;
-float fz1;
+float getfreaqs2(){
+  float fx1;
+  float fy1;
+  float fz1;
  
   //Calculate frequency for fx
   currentTime = millis();
@@ -448,22 +409,32 @@ float fz1;
   // Delay for some time before the next measurement
   //delay(1000); // You can adjust the delay as needed
  float maxf=max(fx1,fy1);
-//Serial.print("Max of fx and fy");Serial.println(maxf);
- maxf=max(maxf,fz1);
-//Serial.print("Max of fx, fy, fz");Serial.println(maxf); 
-return maxf;
-
+  //Serial.print("Max of fx and fy");Serial.println(maxf);
+  maxf=max(maxf,fz1);
+  //Serial.print("Max of fx, fy, fz");Serial.println(maxf); 
+  return maxf;
 }
 
 
-
+void Out2MatLab2Fit(){
+  Serial.println("");
+  //Serial.println("B & f Out To MATLAB!");
+  //Serial.flush(); 
+  // Send data as CSV
+  Serial.print(fx);Serial.print(",");Serial.print(fy);Serial.print(",");Serial.print(fz);Serial.print(",");
+  Serial.print(Bx);Serial.print(",");Serial.print(By);Serial.print(",");Serial.print(Bz);
+  Serial.println("");  // End the line with a newline character
+  //delay(20); // Adjust the delay based on your needs
+}
 
 void OutToThingSpeak(){
-// set the fields with the values
-  ThingSpeak.setField(1, number1);
-  ThingSpeak.setField(2, number2);
-  ThingSpeak.setField(3, number3);
-  ThingSpeak.setField(4, number4);
+  // set the fields with the values
+  ThingSpeak.setField(1, Bx);
+  ThingSpeak.setField(2, By);
+  ThingSpeak.setField(3, Bz);
+  ThingSpeak.setField(4, fx);
+  ThingSpeak.setField(5, fy);
+  ThingSpeak.setField(6, fz);
 
   
   // write to the ThingSpeak channel 
@@ -475,16 +446,6 @@ void OutToThingSpeak(){
     Serial.println("Problem updating channel. HTTP error code " + String(x));
   }
   
-  // change the values
-  number1++;
-  if(number1 > 99){
-    number1 = 0;
-  }
-  number1 = random(0,100);
-  number2 = random(0,100);
-  number3 = random(0,100);
-  number4 = random(0,100);
-  
-  delay(20000); // Wait 20 seconds to update the channel again
+  delay(channel_delay); // Wait 20 seconds to update the channel again
 
 }
